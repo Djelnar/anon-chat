@@ -19,6 +19,8 @@ const {
   NODE_ENV,
 } = process.env
 
+const prod = NODE_ENV === 'production'
+
 const devConfig = webpackConfig({ mode: NODE_ENV })
 
 const app = express()
@@ -27,24 +29,40 @@ app
   .use(morgan('dev'))
   .use('/dist/', express.static('dist'))
 
-const compiler = webpack(devConfig)
+if (!prod) {
+  const compiler = webpack(devConfig)
 
-const devMiddleware = createDevMiddleware(compiler, devConfig)
+  const devMiddleware = createDevMiddleware(compiler, devConfig)
 
-app.use(devMiddleware)
-app.use(webpackHotMiddleware(compiler))
+  app.use(devMiddleware)
+  app.use(webpackHotMiddleware(compiler))
 
-app
-  .get('*', (req, res) => {
-    const assets = res.locals.webpackStats.toJson().assetsByChunkName.main
+  app
+    .get('*', (req, res) => {
+      const assets = res.locals.webpackStats.toJson().assetsByChunkName.main
 
-    const main = Array.isArray(assets) ? assets[0] : assets
+      const main = Array.isArray(assets) ? assets[0] : assets
 
-    const doc = template
-      .replace(/\$scriptTag/, main)
+      const doc = template
+        .replace(/\$scriptTag/, main)
 
-    res.send(doc)
-  })
+      res.send(doc)
+    })
+}
+else {
+  const stats = readFileSync(join(__dirname, 'stats.json'), { encoding: 'utf8' })
+
+  const { main } = JSON.parse(stats)
+
+  app
+    .get('*', (req, res) => {
+      const doc = template
+        .replace(/\$scriptTag/, main)
+
+      res.send(doc)
+    })
+}
+
 
 app.listen(PORT, '0.0.0.0', (error) => {
   if (error) throw error
