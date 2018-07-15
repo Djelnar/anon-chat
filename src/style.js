@@ -18,7 +18,8 @@ injectGlobal`
     box-sizing: border-box;
   }
 
-  #root {
+  #app {
     position: relative;
+    overflow: hidden;
   }
 `

@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "NODE_ENV=development node --experimental-modules index.mjs",
     "start": "NODE_ENV=production node --experimental-modules index.mjs",
+    "wss": "node --inspect --experimental-modules websocket-server.mjs",
     "build": "NODE_ENV=production node --experimental-modules scripts/build.mjs",
     "lint": "eslint src"
   },
@@ -32,6 +33,7 @@
     "express": "^4.16.3",
     "immutable": "^3.8.2",
     "morgan": "^1.9.0",
+    "nanoid": "^1.1.0",
     "ramda": "^0.25.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
@@ -40,6 +42,7 @@
     "redux": "^4.0.0",
     "redux-symbiote": "^2.3.0",
     "redux-thunk": "^2.3.0",
-    "styled-components": "^3.3.3"
+    "styled-components": "^3.3.3",
+    "ws": "^5.2.2"
   }
 }

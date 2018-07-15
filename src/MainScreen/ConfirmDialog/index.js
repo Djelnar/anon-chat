@@ -9,13 +9,13 @@ const Wrapper = styled('div')`
   justify-content: center;
 `
 
-export default ({ toggle }) => (
+export default ({ noFunc, yesFunc }) => (
   <ScreenCover>
     <Text>Switch partner?</Text>
     <Padded />
     <Wrapper>
-      <Button inverted>Yes</Button>
-      <Button onClick={toggle}>No</Button>
+      <Button onClick={yesFunc} inverted>Yes</Button>
+      <Button onClick={noFunc}>No</Button>
     </Wrapper>
   </ScreenCover>
 )

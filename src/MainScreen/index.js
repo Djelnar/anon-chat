@@ -1,5 +1,4 @@
-import React from 'react'
-import { range } from 'ramda'
+import React, { Component } from 'react'
 import { Padded } from 'ui'
 import { Toggle } from 'react-powerplug'
 import ConfirmDialog from './ConfirmDialog'
@@ -15,43 +14,92 @@ import {
 } from './ui'
 
 
-const arr = range(-1, 1)
+const intl = new Intl.DateTimeFormat('ru', {
+  year: 'numeric',
+  day: '2-digit',
+  month: 'long',
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+})
 
-export default () => (
-  <React.Fragment>
-    <Toggle initial={false}>
-      {({ on, toggle }) => (
-        <>
-          {on && (<ConfirmDialog toggle={toggle} />)}
-          <Header>
-            <HeaderInner>
-              {!on && (
-                <SwitchButton onClick={toggle}>switch partner</SwitchButton>
-              )}
-            </HeaderInner>
-          </Header>
-        </>
-      )}
-    </Toggle>
-    <Padded />
-    <Padded>
-      <Messages>
-        {arr.map((v, i) => (
-          <Message
-            // eslint-disable-next-line no-magic-numbers
-            out={!!(i % 2)}
-            key={v}
-          >{v}
-          </Message>
-        ))}
-      </Messages>
-    </Padded>
-    <Padded />
-    <Form>
-      <Input>
-        <input type="text" />
-        <Arrow />
-      </Input>
-    </Form>
-  </React.Fragment>
-)
+export default class MainScreen extends Component {
+  state = {
+    message: '',
+  }
+
+  componentDidUpdate = (prevProps) => {
+    const { messages, scrollBottom } = this.props
+
+    if (prevProps.messages.length < messages.length) {
+      scrollBottom()
+    }
+  }
+
+
+  setMessage = (e) => {
+    this.setState({
+      message: e.target.value,
+    })
+  }
+
+  sendMessage = (e) => {
+    const { sendMessage } = this.props
+    const { message } = this.state
+
+    e.preventDefault()
+    if (message.trim().length > 0) {
+      this.setState({
+        message: '',
+      })
+
+      sendMessage(message)
+    }
+  }
+
+  reload = () => {
+    document.location.reload()
+  }
+
+  render = () => (
+    <React.Fragment>
+      <Toggle initial={false}>
+        {({ on, toggle }) => (
+          <>
+            {on && (<ConfirmDialog noFunc={toggle} yesFunc={this.reload} />)}
+            <Header>
+              <HeaderInner>
+                {!on && (
+                  <SwitchButton onClick={toggle}>switch partner</SwitchButton>
+                )}
+              </HeaderInner>
+            </Header>
+          </>
+        )}
+      </Toggle>
+      <Padded />
+      <Padded scroll>
+        <Messages>
+          {this.props.messages.map(({ key, text, senderID, timestamp }) => (
+            <Message
+              key={key}
+              out={this.props.ownID === senderID ? 1 : 0}
+            >{text}<br />{intl.format(timestamp)}
+            </Message>
+          ))}
+        </Messages>
+      </Padded>
+      <Padded />
+      <Form onSubmit={this.sendMessage}>
+        <Input>
+          <input
+            onChange={this.setMessage}
+            value={this.state.message}
+            type="text"
+          />
+          <Arrow />
+        </Input>
+      </Form>
+    </React.Fragment>
+  )
+}
